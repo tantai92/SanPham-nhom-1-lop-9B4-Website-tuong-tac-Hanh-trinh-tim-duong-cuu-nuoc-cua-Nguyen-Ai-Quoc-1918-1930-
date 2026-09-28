@@ -1,0 +1,476 @@
+
+ 
+<<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hành Trình Tự Do - Lịch Sử 9 Bài 6</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-red: #da251d;
+            --gold-yellow: #ffde00;
+            --accent-blue: #2563eb;
+            --success-green: #16a34a;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, sans-serif; }
+        body { background-color: #f1f5f9; color: #1e293b; min-height: 100vh; display: flex; flex-direction: column; }
+
+        header {
+            background: linear-gradient(135deg, var(--primary-red), #990000);
+            color: white; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15); position: sticky; top: 0; z-index: 100;
+        }
+
+        .header-title { font-size: 1.1rem; font-weight: bold; display: flex; align-items: center; gap: 8px; }
+        .user-stats { display: flex; gap: 12px; align-items: center; background: rgba(255,255,255,0.2); padding: 5px 12px; border-radius: 20px; font-weight: bold; font-size: 0.9rem; }
+
+        .screen { display: none; padding: 20px; max-width: 900px; margin: 0 auto; width: 100%; flex: 1; }
+        .screen.active { display: block; animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Login Screen */
+        .welcome-card { background: white; padding: 30px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.08); text-align: center; margin-top: 20px; }
+        .welcome-card h2 { color: var(--primary-red); margin-bottom: 10px; font-size: 1.5rem; }
+        .form-group input { padding: 12px 20px; width: 85%; max-width: 320px; border: 2px solid #cbd5e1; border-radius: 25px; font-size: 1rem; outline: none; margin: 15px 0; text-align: center; }
+        .form-group input:focus { border-color: var(--primary-red); }
+        
+        .avatar-selector { display: flex; justify-content: center; gap: 15px; margin: 15px 0; }
+        .avatar-btn {
+            width: 70px; height: 70px; border-radius: 50%; border: 3px solid #e2e8f0;
+            cursor: pointer; font-size: 2rem; background: #f8fafc; transition: 0.2s;
+            display: flex; align-items: center; justify-content: center; outline: none;
+        }
+        .avatar-btn.selected { border-color: var(--primary-red); background: #fee2e2; transform: scale(1.15); box-shadow: 0 4px 10px rgba(218, 37, 29, 0.2); }
+        
+        .btn-start { background: var(--primary-red); color: white; border: none; padding: 12px 30px; border-radius: 25px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: 0.2s; margin-top: 10px; }
+        .btn-start:hover { background: #b31b14; }
+
+        /* Map Screen */
+        .map-container { display: flex; flex-direction: column; gap: 12px; margin-top: 15px; }
+        .map-node { display: flex; align-items: center; gap: 15px; background: white; padding: 15px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); cursor: pointer; transition: 0.2s; border-left: 5px solid #cbd5e1; }
+        .map-node:hover:not(.locked) { transform: translateX(5px); }
+        .map-node.locked { opacity: 0.6; cursor: not-allowed; background: #f8fafc; }
+        .map-node.completed { border-left-color: var(--success-green); }
+        .map-node.unlocked { border-left-color: var(--accent-blue); }
+        .node-icon { width: 45px; height: 45px; border-radius: 50%; background: #fee2e2; color: var(--primary-red); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+
+        /* Detail Screen */
+        .location-header { background: white; padding: 15px; border-radius: 12px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
+        .audio-btn { background: var(--accent-blue); color: white; border: none; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 6px; }
+        .knowledge-box { background: #fefce8; border-left: 4px solid #eab308; padding: 15px; border-radius: 8px; margin-bottom: 15px; font-size: 0.95rem; line-height: 1.6; }
+        .mission-box { background: white; padding: 18px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+
+        /* Interactive Elements */
+        .options-grid { display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 12px; }
+        .option-btn { background: #f8fafc; border: 2px solid #e2e8f0; padding: 12px; border-radius: 8px; text-align: left; cursor: pointer; font-size: 0.95rem; }
+        .option-btn:hover { background: #eff6ff; border-color: #93c5fd; }
+        
+        .sort-item { display: flex; align-items: center; justify-content: space-between; background: #f1f5f9; padding: 10px 15px; border-radius: 8px; margin-bottom: 8px; border: 1px solid #cbd5e1; }
+        .sort-btn { background: #e2e8f0; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; margin-left: 5px; }
+
+        .hint-box { margin-top: 15px; padding: 12px; background: #fee2e2; color: #991b1b; border-radius: 8px; display: none; font-size: 0.9rem; }
+        .btn-action { background: var(--success-green); color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 15px; width: 100%; }
+        .btn-back { background: #64748b; color: white; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-size: 0.9rem; }
+
+        /* Certificate Screen */
+        .certificate-card { background: white; border: 6px double var(--gold-yellow); padding: 25px; border-radius: 16px; text-align: center; }
+        .badge-icon { font-size: 3.5rem; color: var(--gold-yellow); margin: 10px 0; }
+
+        .feedback-pop { position: fixed; top: 15px; right: 15px; padding: 12px 20px; border-radius: 8px; color: white; font-weight: bold; z-index: 1000; display: none; }
+        .feedback-pop.success { background: var(--success-green); }
+        .feedback-pop.error { background: #ef4444; }
+
+        @media (min-width: 600px) { .options-grid { grid-template-columns: 1fr 1fr; } }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-title"><i class="fa-solid fa-compass"></i> HÀNH TRÌNH TỰ DO (1918 - 1930)</div>
+        <div class="user-stats">
+            <span id="nav-username">---</span>
+            <span><i class="fa-solid fa-star" style="color: var(--gold-yellow);"></i> <span id="user-xp">0</span> XP</span>
+        </div>
+    </header>
+
+    <div id="feedback" class="feedback-pop"></div>
+
+    <!-- MÀN 1: ĐĂNG NHẬP -->
+    <div id="screen-login" class="screen active">
+        <div class="welcome-card">
+            <h2><i class="fa-solid fa-flag"></i> KHÁM PHÁ LỊCH SỬ LỚP 9</h2>
+            <p>Bài 6: Hoạt động của Nguyễn Ái Quốc & Sự thành lập Đảng Cộng sản Việt Nam</p>
+            <div class="form-group">
+                <input type="text" id="username-input" placeholder="Nhập tên học sinh..." value="Hà Thị Hoài">
+            </div>
+            <p style="font-weight: bold; font-size: 0.9rem;">Chọn nhân vật đại diện:</p>
+            <div class="avatar-selector">
+                <button type="button" class="avatar-btn selected" onclick="chooseAvatar(this, '👩‍🎓')">👩‍🎓</button>
+                <button type="button" class="avatar-btn" onclick="chooseAvatar(this, '👨‍🎓')">👨‍🎓</button>
+                <button type="button" class="avatar-btn" onclick="chooseAvatar(this, '🕵️')">🕵️</button>
+            </div>
+            <button type="button" class="btn-start" onclick="startGame()">BẮT ĐẦU HÀNH TRÌNH <i class="fa-solid fa-arrow-right"></i></button>
+        </div>
+    </div>
+
+    <!-- MÀN 2: BẢN ĐỒ -->
+    <div id="screen-map" class="screen">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <h3>Bản Đồ Địa Điểm Lịch Sử</h3>
+            <button class="btn-back" onclick="showScreen('screen-login')">Đổi Tên</button>
+        </div>
+        <div class="map-container" id="map-nodes-container"></div>
+    </div>
+
+    <!-- MÀN 3: CHI TIẾT & NHIỆM VỤ -->
+    <div id="screen-location" class="screen">
+        <button class="btn-back" onclick="goBackToMap()" style="margin-bottom: 10px;"><i class="fa-solid fa-arrow-left"></i> Trở về bản đồ</button>
+        <div class="location-header">
+            <div>
+                <h3 id="loc-title">Tên Địa Điểm</h3>
+                <p id="loc-subtitle" style="color: #64748b; font-size: 0.85rem;"></p>
+            </div>
+            <button class="audio-btn" onclick="speakText()"><i class="fa-solid fa-volume-high"></i> NGHE ĐỌC</button>
+        </div>
+        <div class="knowledge-box">
+            <h4 style="color: #b45309; margin-bottom: 5px;"><i class="fa-solid fa-book-open"></i> Tư Liệu Kiến Thức SGK:</h4>
+            <p id="loc-knowledge"></p>
+        </div>
+        <div class="mission-box">
+            <h4 style="color: var(--primary-red); margin-bottom: 8px;"><i class="fa-solid fa-gamepad"></i> Nhiệm Vụ: <span id="loc-mission-type"></span></h4>
+            <p id="mission-instruction" style="font-size: 0.95rem; margin-bottom: 12px;"></p>
+            <div id="mission-interactive-area"></div>
+            <div id="hint-box" class="hint-box"><i class="fa-solid fa-lightbulb"></i> <strong>Gợi ý:</strong> <span id="hint-text"></span></div>
+        </div>
+    </div>
+
+    <!-- MÀN 4: BOSS & TỔNG KẾT -->
+    <div id="screen-boss-result" class="screen">
+        <div class="certificate-card">
+            <h2>🏆 CHÚC MỪNG HOÀN THÀNH HÀNH TRÌNH!</h2>
+            <div class="badge-icon"><i class="fa-solid fa-award"></i></div>
+            <p>Nhà Khám Phá Lịch Sử Xuất Sắc:</p>
+            <h3 id="final-username" style="color: var(--primary-red); font-size: 1.6rem; margin: 5px 0;">---</h3>
+            <p>Tổng số điểm đạt được: <strong id="final-xp" style="color: var(--primary-red); font-size: 1.4rem;">0</strong> XP</p>
+            <div style="background: #f8fafc; padding: 12px; border-radius: 8px; margin: 15px 0; text-align: left; font-size: 0.9rem; line-height: 1.5;">
+                <p>🏅 <strong>Danh hiệu:</strong> Bậc Thầy Lịch Sử Khái Quát (Bài 6 - Lớp 9)</p>
+                <p>✅ Đã nắm vững hành trình tìm đường cứu nước của Nguyễn Ái Quốc (1918 - 1930).</p>
+                <p>✅ Hiểu rõ ý nghĩa lịch sử của việc thành lập Đảng Cộng sản Việt Nam (2/1930).</p>
+            </div>
+            <button class="btn-start" onclick="resetGame()">CHƠI LẠI TỪ ĐẦU</button>
+        </div>
+    </div>
+
+    <script>
+        const locationsData = {
+            1: {
+                title: "1. Nước Pháp (1918 - 1923)",
+                subtitle: "Tìm thấy con đường cứu nước theo cách mạng vô sản",
+                knowledge: "• Tháng 6 năm 1919: Gửi Bản yêu sách của nhân dân An Nam tới Hội nghị Véc-xai.\n• Tháng 7 năm 1920: Đọc Sơ thảo Luận cương của Lênin về vấn đề dân tộc và thuộc địa.\n• Tháng 12 năm 1920: Bỏ phiếu tán thành gia nhập Quốc tế Cộng sản tại Đại hội Tua.\n• Năm 1921: Sáng lập Hội Liên hiệp thuộc địa; năm 1922 ra báo Người cùng khổ.",
+                missionType: "Sắp xếp mốc thời gian",
+                instruction: "Dùng nút ⬆️ ⬇️ để sắp xếp 4 sự kiện sau theo đúng thứ tự thời gian từ trước đến sau:",
+                type: "sorting",
+                items: [
+                    { id: 2, text: "Đọc Sơ thảo Luận cương của Lênin về vấn đề dân tộc và thuộc địa (Tháng 7/1920)" },
+                    { id: 1, text: "Gửi Bản yêu sách của nhân dân An Nam tới Hội nghị Véc-xai (Tháng 6/1919)" },
+                    { id: 4, text: "Sáng lập Hội Liên hiệp thuộc địa (Năm 1921)" },
+                    { id: 3, text: "Bỏ phiếu tán thành gia nhập Quốc tế Cộng sản tại Đại hội Tua (Tháng 12/1920)" }
+                ],
+                correctOrder: [1, 2, 3, 4],
+                hint: "Mốc thời gian đúng: 6/1919 -> 7/1920 -> 12/1920 -> Năm 1921.",
+                xp: 150
+            },
+            2: {
+                title: "2. Liên Xô (1923 - 1924)",
+                subtitle: "Nghiên cứu lý luận và hoạt động trong phong trào Quốc tế Cộng sản",
+                knowledge: "• Tháng 10 năm 1923: Dự Hội nghị Quốc tế Nông dân và được bầu vào Ban Chấp hành.\n• Tháng 6 năm 1924: Trình bày tham luận tại Đại hội lần thứ 5 của Quốc tế Cộng sản.\n• Viết bài cho báo Sự thật, tạp chí Thư ký quốc tế.",
+                missionType: "Trắc nghiệm kiến thức",
+                instruction: "Nguyễn Ái Quốc dự Hội nghị Quốc tế Nông dân và được bầu vào Ban Chấp hành vào thời gian nào?",
+                type: "quiz",
+                options: ["Tháng 6/1919", "Tháng 10/1923", "Tháng 6/1924", "Tháng 12/1920"],
+                correctIndex: 1,
+                hint: "Sự kiện diễn ra vào cuối năm 1923 sau khi Người đến Liên Xô.",
+                xp: 150
+            },
+            3: {
+                title: "3. Quảng Châu - Trung Quốc (1924 - 1927)",
+                subtitle: "Chuẩn bị về tổ chức và cán bộ cho sự thành lập Đảng",
+                knowledge: "• Tháng 6 năm 1925: Thành lập Hội Việt Nam Cách mạng Thanh niên, xuất bản báo Thanh niên.\n• Mở các lớp huấn luyện chính trị đào tạo cán bộ.\n• Đầu năm 1927: Xuất bản tác phẩm Đường Kách mệnh.",
+                missionType: "Nối cặp tương ứng",
+                instruction: "Chọn sự kiện ở Cột A ghép nối đúng với Nội dung ở Cột B:",
+                type: "quiz",
+                options: [
+                    "Thành lập Hội VN Cách mạng Thanh niên (6/1925) & Xuất bản Đường Kách mệnh (1927)",
+                    "Thành lập Đảng Cộng sản Pháp (12/1920)",
+                    "Gửi Bản yêu sách An Nam (6/1919)"
+                ],
+                correctIndex: 0,
+                hint: "Hội VN Cách mạng Thanh niên thành lập tháng 6/1925 tại Quảng Châu.",
+                xp: 150
+            },
+            4: {
+                title: "4. Việt Nam (1929) - 3 Tổ Chức Cộng Sản",
+                subtitle: "Sự ra đời của 3 tổ chức cộng sản năm 1929",
+                knowledge: "• Tháng 6 năm 1929: Đông Dương Cộng sản đảng tại Bắc Kỳ.\n• Tháng 8 năm 1929: An Nam Cộng sản đảng tại Nam Kỳ.\n• Tháng 9 năm 1929: Đông Dương Cộng sản liên đoàn tại Trung Kỳ.",
+                missionType: "Trắc nghiệm địa bàn",
+                instruction: "Hãy xác định đúng 3 tổ chức cộng sản ra đời năm 1929 theo thứ tự địa bàn Bắc Kỳ, Nam Kỳ, Trung Kỳ:",
+                type: "quiz",
+                options: [
+                    "Đông Dương Cộng sản đảng, An Nam Cộng sản đảng, Đông Dương Cộng sản liên đoàn",
+                    "An Nam Cộng sản đảng, Đông Dương Cộng sản đảng, Đông Dương Cộng sản liên đoàn",
+                    "Chỉ có 1 tổ chức duy nhất ở Hà Nội"
+                ],
+                correctIndex: 0,
+                hint: "Bắc Kỳ: Đông Dương CSĐ; Nam Kỳ: An Nam CSĐ; Trung Kỳ: Đông Dương CS Liên đoàn.",
+                xp: 150
+            },
+            'boss': {
+                title: "5. HƯƠNG CẢNG (Tháng 2 năm 1930)",
+                subtitle: "Hội nghị hợp nhất thành lập Đảng Cộng sản Việt Nam",
+                knowledge: "• Hoàn cảnh: 3 tổ chức cộng sản năm 1929 hoạt động riêng rẽ. Nguyễn Ái Quốc chủ trì Hội nghị hợp nhất tại Hương Cảng từ ngày 6 tháng 1 năm 1930.\n• Kết quả: Nhất trí hợp nhất thành Đảng Cộng sản Việt Nam. Thông qua Chánh cương tắt, Sách lược tắt.\n• Ý nghĩa: Chấm dứt thời kỳ khủng hoảng đường lối lãnh đạo cách mạng Việt Nam.",
+                missionType: "Thử Thách Cuối Cùng",
+                instruction: "Hội nghị hợp nhất thành lập Đảng do ai chủ trì và diễn ra từ thời gian nào?",
+                type: "quiz",
+                options: [
+                    "Nguyễn Ái Quốc - Bắt đầu từ ngày 6/1/1930",
+                    "Trần Phú - Bắt đầu từ ngày 1/5/1930",
+                    "Lê Hồng Phong - Bắt đầu từ ngày 12/12/1929"
+                ],
+                correctIndex: 0,
+                hint: "Nguyễn Ái Quốc với tư cách phái viên Quốc tế Cộng sản đã chủ trì hội nghị bắt đầu từ ngày 6/1/1930.",
+                xp: 200
+            }
+        };
+
+        let gameState = { username: "Hà Thị Hoài", avatar: "👩‍🎓", xp: 0, completedNodes: [], currentNode: 1 };
+        let currentSortingItems = [];
+
+        function chooseAvatar(buttonEl, avatarChar) {
+            document.querySelectorAll('.avatar-btn').forEach(btn => btn.classList.remove('selected'));
+            buttonEl.classList.add('selected');
+            gameState.avatar = avatarChar;
+        }
+
+        function playSound(type) {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain); gain.connect(ctx.destination);
+                if (type === 'win') {
+                    osc.frequency.setValueAtTime(440, ctx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.25);
+                    gain.gain.setValueAtTime(0.2, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.25);
+                } else {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(200, ctx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(100, ctx.currentTime + 0.25);
+                    gain.gain.setValueAtTime(0.2, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.25);
+                }
+                osc.start(); osc.stop(ctx.currentTime + 0.25);
+            } catch(e){}
+        }
+
+        function speakText() {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const loc = locationsData[gameState.currentNode];
+                const text = loc.title + ". " + loc.knowledge;
+                const utterance = new SpeechSynthesisUtterance(text);
+                
+                // Ép trình duyệt tìm đúng giọng tiếng Việt
+                const voices = window.speechSynthesis.getVoices();
+                const viVoice = voices.find(v => v.lang.includes('vi') || v.lang.includes('VI'));
+                
+                utterance.lang = 'vi-VN';
+                if (viVoice) {
+                    utterance.voice = viVoice;
+                }
+                
+                utterance.rate = 0.9;
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        // Tải trước danh sách giọng đọc của trình duyệt
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.onvoiceschanged = () => { window.speechSynthesis.getVoices(); };
+        }
+
+        function showScreen(screenId) {
+            if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+            if (screenId === 'screen-map') renderMap();
+        }
+
+        function goBackToMap() { showScreen('screen-map'); }
+
+        function startGame() {
+            const input = document.getElementById('username-input').value.trim();
+            if (!input) return showFeedback("Vui lòng nhập tên học sinh!", "error");
+            gameState.username = input;
+            document.getElementById('nav-username').innerHTML = `${gameState.avatar} ${gameState.username}`;
+            updateStats(); showScreen('screen-map');
+        }
+
+        function updateStats() { document.getElementById('user-xp').innerText = gameState.xp; }
+
+        function showFeedback(text, type) {
+            const pop = document.getElementById('feedback');
+            pop.innerText = text; pop.className = `feedback-pop ${type}`; pop.style.display = 'block';
+            setTimeout(() => { pop.style.display = 'none'; }, 2500);
+        }
+
+        function renderMap() {
+            const container = document.getElementById('map-nodes-container');
+            container.innerHTML = '';
+            const keys = [1, 2, 3, 4, 'boss'];
+            keys.forEach((key, idx) => {
+                const loc = locationsData[key];
+                const isCompleted = gameState.completedNodes.includes(key);
+                const isUnlocked = idx === 0 || gameState.completedNodes.includes(keys[idx - 1]);
+                
+                let statusClass = 'locked';
+                let iconHtml = '<i class="fa-solid fa-lock"></i>';
+                if (isCompleted) { statusClass = 'completed'; iconHtml = '<i class="fa-solid fa-check" style="color:var(--success-green)"></i>'; }
+                else if (isUnlocked) { statusClass = 'unlocked'; iconHtml = '<i class="fa-solid fa-unlock" style="color:var(--accent-blue)"></i>'; }
+
+                container.innerHTML += `
+                    <div class="map-node ${statusClass}" onclick="openLocation('${key}')">
+                        <div class="node-icon"><i class="fa-solid ${key === 'boss' ? 'fa-crown' : 'fa-location-dot'}"></i></div>
+                        <div style="flex:1;">
+                            <h4 style="font-size:1rem;">${loc.title}</h4>
+                            <p style="font-size:0.8rem; color:#64748b;">${loc.subtitle}</p>
+                        </div>
+                        <div>${iconHtml}</div>
+                    </div>
+                `;
+            });
+        }
+
+        function openLocation(nodeId) {
+            const keys = [1, 2, 3, 4, 'boss'];
+            const idx = keys.indexOf(isNaN(nodeId) ? nodeId : Number(nodeId));
+            if (idx > 0 && !gameState.completedNodes.includes(keys[idx - 1])) {
+                return showFeedback("🔐 Hãy hoàn thành địa điểm trước đó để mở khóa!", "error");
+            }
+
+            gameState.currentNode = nodeId;
+            const loc = locationsData[nodeId];
+            document.getElementById('loc-title').innerText = loc.title;
+            document.getElementById('loc-subtitle').innerText = loc.subtitle;
+            document.getElementById('loc-knowledge').innerText = loc.knowledge;
+            document.getElementById('loc-mission-type').innerText = loc.missionType;
+            document.getElementById('mission-instruction').innerText = loc.instruction;
+            document.getElementById('hint-box').style.display = 'none';
+
+            renderMissionInteractive(loc);
+            showScreen('screen-location');
+        }
+
+        function renderMissionInteractive(loc) {
+            const container = document.getElementById('mission-interactive-area');
+            container.innerHTML = '';
+
+            if (loc.type === 'sorting') {
+                currentSortingItems = [...loc.items];
+                renderSortingList();
+            } else if (loc.type === 'quiz') {
+                let html = '<div class="options-grid">';
+                loc.options.forEach((opt, idx) => {
+                    html += `<button class="option-btn" onclick="checkQuizMission(${idx})">${opt}</button>`;
+                });
+                html += '</div>';
+                container.innerHTML = html;
+            }
+        }
+
+        function renderSortingList() {
+            const container = document.getElementById('mission-interactive-area');
+            let html = '<div>';
+            currentSortingItems.forEach((item, index) => {
+                html += `
+                    <div class="sort-item">
+                        <span>${item.text}</span>
+                        <div>
+                            ${index > 0 ? `<button class="sort-btn" onclick="moveSort(${index}, -1)">⬆️</button>` : ''}
+                            ${index < currentSortingItems.length - 1 ? `<button class="sort-btn" onclick="moveSort(${index}, 1)">⬇️</button>` : ''}
+                        </div>
+                    </div>
+                `;
+            });
+            html += '<button class="btn-action" onclick="checkSortingMission()">XÁC NHẬN SẮP XẾP</button></div>';
+            container.innerHTML = html;
+        }
+
+        function moveSort(index, direction) {
+            const target = index + direction;
+            const temp = currentSortingItems[index];
+            currentSortingItems[index] = currentSortingItems[target];
+            currentSortingItems[target] = temp;
+            renderSortingList();
+        }
+
+        function checkSortingMission() {
+            const loc = locationsData[gameState.currentNode];
+            const userOrder = currentSortingItems.map(i => i.id);
+            const isCorrect = JSON.stringify(userOrder) === JSON.stringify(loc.correctOrder);
+
+            if (isCorrect) {
+                playSound('win');
+                showFeedback("🎉 Chính xác tuyệt đối! +" + loc.xp + " XP", "success");
+                unlockNext(gameState.currentNode, loc.xp);
+            } else {
+                playSound('wrong');
+                showFeedback("❌ Thứ tự chưa đúng, xem gợi ý bên dưới nhé!", "error");
+                document.getElementById('hint-text').innerText = loc.hint;
+                document.getElementById('hint-box').style.display = 'block';
+            }
+        }
+
+        function checkQuizMission(selectedIndex) {
+            const loc = locationsData[gameState.currentNode];
+            if (selectedIndex === loc.correctIndex) {
+                playSound('win');
+                showFeedback("🎉 Rất giỏi! +" + loc.xp + " XP", "success");
+                unlockNext(gameState.currentNode, loc.xp);
+            } else {
+                playSound('wrong');
+                showFeedback("❌ Chưa chính xác, thử lại xem nhé!", "error");
+                document.getElementById('hint-text').innerText = loc.hint;
+                document.getElementById('hint-box').style.display = 'block';
+            }
+        }
+
+        function unlockNext(nodeId, xpGained) {
+            const parsedId = isNaN(nodeId) ? nodeId : Number(nodeId);
+            if (!gameState.completedNodes.includes(parsedId)) {
+                gameState.completedNodes.push(parsedId);
+                gameState.xp += xpGained;
+                updateStats();
+            }
+
+            setTimeout(() => {
+                if (parsedId === 'boss') {
+                    document.getElementById('final-username').innerText = gameState.username;
+                    document.getElementById('final-xp').innerText = gameState.xp;
+                    showScreen('screen-boss-result');
+                } else {
+                    showScreen('screen-map');
+                }
+            }, 1200);
+        }
+
+        function resetGame() {
+            gameState.xp = 0; gameState.completedNodes = [];
+            updateStats(); showScreen('screen-login');
+        }
+    </script>
+</body>
+</html>
